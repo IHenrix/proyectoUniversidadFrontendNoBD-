@@ -9,9 +9,9 @@
 </div>
 
 <div class="tab-strip mb-4">
-  <button class="tab-btn" [class.active]="selectedTab==='cursos'" (click)="cambiarTab('cursos')"><i class="fa fa-book mr-2"></i>Cursos</button>
-  <button class="tab-btn" [class.active]="selectedTab==='secciones'" (click)="cambiarTab('secciones')"><i class="fa fa-sitemap mr-2"></i>Secciones</button>
-  <button class="tab-btn" [class.active]="selectedTab==='usuarios'" (click)="cambiarTab('usuarios')"><i class="fa fa-users mr-2"></i>Usuarios</button>
+  <button class="tab-btn" [class.active]="selectedTab==='cursos'" (click)="cambiarTab('cursos')"><i class="fa fa-book icon-sunarp"></i>Cursos</button>
+  <button class="tab-btn" [class.active]="selectedTab==='secciones'" (click)="cambiarTab('secciones')"><i class="fa fa-sitemap icon-sunarp"></i>Secciones</button>
+  <button class="tab-btn" [class.active]="selectedTab==='usuarios'" (click)="cambiarTab('usuarios')"><i class="fa fa-users icon-sunarp"></i>Usuarios</button>
 </div>
 
 <div class="tab-content mt-3" [ngSwitch]="selectedTab">
@@ -31,7 +31,10 @@
                   <option *ngFor="let m of modalidades" [value]="m.code">{{m.label}}</option>
                 </select>
               </div>
-              <button type="button" class="btn-sunarp-black btn-block mt-2" (click)="crearCurso()"><i class="fa fa-save icon-sunarp mr-2"></i>Guardar</button>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn-sunarp-green mt-2" (click)="crearCurso()"><i class="fa fa-save icon-sunarp"></i>{{editCursoId?'Actualizar':'Guardar'}}</button>
+                <button *ngIf="editCursoId" type="button" class="btn-sunarp-cyan mt-2" (click)="cancelarCurso()"><i class="fa fa-undo icon-sunarp"></i>Cancelar</button>
+              </div>
             </form>
           </div>
         </div>
@@ -43,13 +46,17 @@
             <table class="table table-sm table-striped">
               <thead>
                 <tr>
-                  <th>Nombre</th><th>Horas</th><th>Créditos</th><th>Modalidad</th>
+                  <th>Nombre</th><th>Horas</th><th>Créditos</th><th>Modalidad</th><th class="text-center">Acción</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let c of cursos">
                   <td>{{c.nombre}}</td><td>{{c.horas_semanales}}</td><td>{{c.creditos}}</td>
                   <td>{{c.modalidad=='V'?'Virtual':c.modalidad=='P'?'Presencial':'Remota'}}</td>
+                  <td class="text-center">
+                  <button class="btn btn-sm btn-outline-sunarp-green mr-1" (click)="editarCurso(c)"><i class="fa fa-pencil icon-sunarp"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" (click)="eliminarCurso(c.id)"><i class="fa fa-trash icon-sunarp"></i></button>
+                  </td>
                 </tr>
                 <tr *ngIf="!cursos?.length"><td colspan="4" class="text-center text-muted">Sin registros</td></tr>
               </tbody>
@@ -93,7 +100,7 @@
               <div class="form-group" formArrayName="horarios">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <label class="mb-0">Horarios</label>
-                  <button class="btn btn-sm btn-outline-primary" type="button" (click)="addHorario()"><i class="fa fa-plus icon-sunarp mr-1"></i>Agregar</button>
+                  <button class="btn btn-sm btn-outline-sunarp-green" type="button" (click)="addHorario()"><i class="fa fa-plus icon-sunarp"></i>Agregar</button>
                 </div>
                 <div *ngFor="let h of horariosArray.controls; let i = index" [formGroupName]="i" class="horario-box">
                   <input class="form-control-sunarp mb-1" placeholder="Día" formControlName="dia">
@@ -104,7 +111,10 @@
                   <button class="btn btn-sm btn-outline-danger" type="button" (click)="removeHorario(i)">Quitar</button>
                 </div>
               </div>
-              <button type="button" class="btn-sunarp-black btn-block mt-2" (click)="crearSeccion()"><i class="fa fa-save icon-sunarp mr-2"></i>Guardar</button>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn-sunarp-green mt-2" (click)="crearSeccion()"><i class="fa fa-save icon-sunarp"></i>{{editSeccionId?'Actualizar':'Guardar'}}</button>
+                <button *ngIf="editSeccionId" type="button" class="btn-sunarp-cyan mt-2" (click)="cancelarSeccion()"><i class="fa fa-undo icon-sunarp"></i>Cancelar</button>
+              </div>
             </form>
           </div>
         </div>
@@ -114,13 +124,17 @@
           <div class="card-header">Secciones registradas</div>
           <div class="card-body table-responsive">
             <table class="table table-sm table-striped">
-              <thead><tr><th>Código</th><th>Curso</th><th>Docente</th><th>Modalidad</th></tr></thead>
+              <thead><tr><th>Código</th><th>Curso</th><th>Docente</th><th>Modalidad</th><th class="text-center">Acción</th></tr></thead>
               <tbody>
                 <tr *ngFor="let s of secciones">
                   <td>{{s.codigo}}</td>
                   <td>{{ nombreCurso(s.curso_id) }}</td>
                   <td>{{ nombreUsuario(s.docente_id) }}</td>
                   <td>{{s.modalidad=='V'?'Virtual':s.modalidad=='P'?'Presencial':'Remota'}}</td>
+                  <td class="text-center">
+                    <button class="btn btn-sm btn-outline-sunarp-green mr-1" (click)="editarSeccion(s)"><i class="fa fa-pencil icon-sunarp"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" (click)="eliminarSeccion(s.id)"><i class="fa fa-trash icon-sunarp"></i></button>
+                  </td>
                 </tr>
                 <tr *ngIf="!secciones?.length"><td colspan="4" class="text-center text-muted">Sin registros</td></tr>
               </tbody>
@@ -151,7 +165,10 @@
                   <option [value]="3">Admin</option>
                 </select>
               </div>
-              <button type="button" class="btn-sunarp-black btn-block mt-2" (click)="crearUsuario()"><i class="fa fa-save icon-sunarp mr-2"></i>Guardar</button>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn-sunarp-green mt-2" (click)="crearUsuario()"><i class="fa fa-save icon-sunarp"></i>{{editUsuarioId?'Actualizar':'Guardar'}}</button>
+                <button *ngIf="editUsuarioId" type="button" class="btn-sunarp-cyan mt-2" (click)="cancelarUsuario()"><i class="fa fa-undo icon-sunarp"></i>Cancelar</button>
+              </div>
             </form>
           </div>
         </div>
@@ -161,15 +178,19 @@
           <div class="card-header">Usuarios registrados</div>
           <div class="card-body table-responsive">
             <table class="table table-sm table-striped">
-              <thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Estado</th></tr></thead>
+              <thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Estado</th><th class="text-center">Acción</th></tr></thead>
               <tbody>
                 <tr *ngFor="let u of usuarios">
                   <td>{{u.username}}</td>
                   <td>{{u.nombre}} {{u.paterno}}</td>
                   <td>{{u.rol_id==1?'Alumno':u.rol_id==2?'Docente':'Admin'}}</td>
                   <td><span [ngClass]="u.activo?'badge badge-success':'badge badge-secondary'">{{u.activo?'Activo':'Inactivo'}}</span></td>
+                  <td class="text-center">
+                    <button class="btn btn-sm btn-outline-sunarp-green mr-1" (click)="editarUsuario(u)"><i class="fa fa-pencil icon-sunarp"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" (click)="eliminarUsuario(u.id)"><i class="fa fa-trash icon-sunarp"></i></button>
+                  </td>
                 </tr>
-                <tr *ngIf="!usuarios?.length"><td colspan="4" class="text-center text-muted">Sin registros</td></tr>
+                <tr *ngIf="!usuarios?.length"><td colspan="5" class="text-center text-muted">Sin registros</td></tr>
               </tbody>
             </table>
           </div>

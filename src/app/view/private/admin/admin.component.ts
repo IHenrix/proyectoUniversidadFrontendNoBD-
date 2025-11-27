@@ -16,6 +16,9 @@ export class AdminComponent implements OnInit {
   usuarios:any[]=[];
   secciones:any[]=[];
   selectedTab: 'cursos' | 'secciones' | 'usuarios' = 'cursos';
+  editCursoId: number | null = null;
+  editSeccionId: number | null = null;
+  editUsuarioId: number | null = null;
 
   cursoForm: FormGroup;
   usuarioForm: FormGroup;
@@ -87,44 +90,69 @@ export class AdminComponent implements OnInit {
   }
 
   crearCurso() {
-    if (this.cursoForm.invalid) return;
+    if (this.cursoForm.invalid) { this.cursoForm.markAllAsTouched(); return; }
     this.spinner.show();
-    this.adminService.crearCurso(this.cursoForm.value).subscribe({
+    const payload = this.cursoForm.value;
+    const obs = this.editCursoId ? this.adminService.actualizarCurso(this.editCursoId, payload) : this.adminService.crearCurso(payload);
+    obs.subscribe({
       next: res => {
-        this.cursos.push(res);
+        if (this.editCursoId) {
+          const idx = this.cursos.findIndex(c=>c.id===this.editCursoId);
+          if (idx>=0) this.cursos[idx]=res;
+        } else {
+          this.cursos.push(res);
+        }
         this.cursoForm.reset({modalidad:'P'});
+        this.editCursoId=null;
         this.spinner.hide();
-        Swal.fire({icon:'success', title:'Curso creado', text: res.nombre || 'Registro guardado', confirmButtonColor:'#00A5A5'});
+        Swal.fire({icon:'success', title:'Curso guardado', text: res.nombre || 'Registro guardado', confirmButtonColor:'#00A5A5'});
       },
-      error: ()=> { alertNotificacion("No se pudo crear curso"); this.spinner.hide(); }
+      error: ()=> { alertNotificacion("No se pudo guardar curso"); this.spinner.hide(); }
     });
   }
 
   crearUsuario() {
-    if (this.usuarioForm.invalid) return;
+    if (this.usuarioForm.invalid) { this.usuarioForm.markAllAsTouched(); return; }
     this.spinner.show();
-    this.adminService.crearUsuario(this.usuarioForm.value).subscribe({
+    const payload = this.usuarioForm.value;
+    const obs = this.editUsuarioId ? this.adminService.actualizarUsuario(this.editUsuarioId, payload) : this.adminService.crearUsuario(payload);
+    obs.subscribe({
       next: res => {
-        this.usuarios.push(res);
+        if (this.editUsuarioId) {
+          const idx = this.usuarios.findIndex(u=>u.id===this.editUsuarioId);
+          if (idx>=0) this.usuarios[idx]=res;
+        } else {
+          this.usuarios.push(res);
+        }
+        this.usuarioForm.reset({rol_id:2, activo:true});
+        this.editUsuarioId=null;
         this.spinner.hide();
-        Swal.fire({icon:'success', title:'Usuario creado', text: res.username || 'Registro guardado', confirmButtonColor:'#00A5A5'});
+        Swal.fire({icon:'success', title:'Usuario guardado', text: res.username || 'Registro guardado', confirmButtonColor:'#00A5A5'});
       },
-      error: ()=> { alertNotificacion("No se pudo crear usuario"); this.spinner.hide(); }
+      error: ()=> { alertNotificacion("No se pudo guardar usuario"); this.spinner.hide(); }
     });
   }
 
   crearSeccion() {
-    if (this.seccionForm.invalid) return;
+    if (this.seccionForm.invalid) { this.seccionForm.markAllAsTouched(); return; }
     this.spinner.show();
-    this.adminService.crearSeccion(this.seccionForm.value).subscribe({
+    const payload = this.seccionForm.value;
+    const obs = this.editSeccionId ? this.adminService.actualizarSeccion(this.editSeccionId, payload) : this.adminService.crearSeccion(payload);
+    obs.subscribe({
       next: res => {
-        this.secciones.push(res);
+        if (this.editSeccionId) {
+          const idx = this.secciones.findIndex(s=>s.id===this.editSeccionId);
+          if (idx>=0) this.secciones[idx]=res;
+        } else {
+          this.secciones.push(res);
+        }
         this.seccionForm.reset({modalidad:'P', numero_vez:1, estado:'E', horarios:[]});
         this.horariosArray.clear();
+        this.editSeccionId=null;
         this.spinner.hide();
-        Swal.fire({icon:'success', title:'Sección creada', text: res.codigo || 'Registro guardado', confirmButtonColor:'#00A5A5'});
+        Swal.fire({icon:'success', title:'Sección guardada', text: res.codigo || 'Registro guardado', confirmButtonColor:'#00A5A5'});
       },
-      error: ()=> { alertNotificacion("No se pudo crear seccion"); this.spinner.hide(); }
+      error: ()=> { alertNotificacion("No se pudo guardar seccion"); this.spinner.hide(); }
     });
   }
 
@@ -140,5 +168,71 @@ export class AdminComponent implements OnInit {
   nombreUsuario(id: number): string {
     const u = this.usuarios.find(x => x.id === id);
     return u ? `${u.nombre || ''} ${u.paterno || ''}`.trim() : 'N/D';
+  }
+
+  editarCurso(c:any){
+    this.selectedTab='cursos';
+    this.editCursoId = c.id;
+    this.cursoForm.patchValue(c);
+  }
+
+  cancelarCurso() {
+    this.editCursoId = null;
+    this.cursoForm.reset({modalidad:'P'});
+  }
+
+  eliminarCurso(id:number){
+    Swal.fire({icon:'warning', title:'Eliminar curso', text:'¿Desea eliminar este curso?', showCancelButton:true, confirmButtonColor:'#d75443'}).then(r=>{
+      if (r.isConfirmed){
+        this.adminService.eliminarCurso(id).subscribe(()=> {
+          this.cursos = this.cursos.filter(c=>c.id!==id);
+        });
+      }
+    });
+  }
+
+  editarSeccion(s:any){
+    this.selectedTab='secciones';
+    this.editSeccionId = s.id;
+    this.horariosArray.clear();
+    (s.horarios||[]).forEach((h:any)=> this.horariosArray.push(this.fb.group({dia:[h.dia], horaInicio:[h.horaInicio], horaFin:[h.horaFin]})));
+    this.seccionForm.patchValue({...s, horarios:[]});
+  }
+
+  cancelarSeccion() {
+    this.editSeccionId = null;
+    this.seccionForm.reset({modalidad:'P', numero_vez:1, estado:'E', horarios:[]});
+    this.horariosArray.clear();
+  }
+
+  eliminarSeccion(id:number){
+    Swal.fire({icon:'warning', title:'Eliminar sección', text:'¿Desea eliminar esta sección?', showCancelButton:true, confirmButtonColor:'#d75443'}).then(r=>{
+      if (r.isConfirmed){
+        this.adminService.eliminarSeccion(id).subscribe(()=> {
+          this.secciones = this.secciones.filter(s=>s.id!==id);
+        });
+      }
+    });
+  }
+
+  editarUsuario(u:any){
+    this.selectedTab='usuarios';
+    this.editUsuarioId = u.id;
+    this.usuarioForm.patchValue(u);
+  }
+
+  cancelarUsuario() {
+    this.editUsuarioId = null;
+    this.usuarioForm.reset({rol_id:2, activo:true});
+  }
+
+  eliminarUsuario(id:number){
+    Swal.fire({icon:'warning', title:'Eliminar usuario', text:'¿Desea eliminar este usuario?', showCancelButton:true, confirmButtonColor:'#d75443'}).then(r=>{
+      if (r.isConfirmed){
+        this.adminService.eliminarUsuario(id).subscribe(()=> {
+          this.usuarios = this.usuarios.filter(u=>u.id!==id);
+        });
+      }
+    });
   }
 }
