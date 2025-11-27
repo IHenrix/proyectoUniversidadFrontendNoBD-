@@ -1,0 +1,153 @@
+<h2 *ngIf="cursoSeleccionado == null" class="h2-sunarp text-sunarp-gray-dark text-center mt-4 mb-4">Mis Secciones Asignadas</h2>
+<div *ngIf="cursoSeleccionado == null"  class="container-payment">
+  <div *ngFor="let item of listaCursos" class="card-payment">
+    <div class="face face1 bg-sunarp-red-light selected-face">
+      <div class="content-payment">
+        <img alt="icono"  [src]="authService.obtenerRol()== CONSTANTES.DOCENTE_ROL ? 'assets/img/docente.png' : 'assets/img/alumno-curso.png'"  />
+        <h3>{{item.curso}}</h3>
+        <p class="mt-1 mb-0 text-white" *ngIf="item.seccion_codigo">Seccion: {{item.seccion_codigo}}</p>
+      </div>
+    </div>
+    <div class="face face2 selected-face">
+      <div class="content-payment">
+        <p>Cantidad de Alumnos: <b>{{item.alumnos}}</b><br>
+          Modalidad<br><span class="badge-sunarp badge-sunarp-gray-light" style="font: 15px;">
+          {{item.modalidad=='V'?'Virtual':item.modalidad=='P'?'Presencial':'Remota'}}
+        </span>
+        <br *ngIf="item.horarios?.length">
+        <ng-container *ngIf="item.horarios?.length">
+          Horarios:
+          <ul class="horarios-list">
+            <li *ngFor="let h of item.horarios">{{h.dia}} {{h.horaInicio}} - {{h.horaFin}}</li>
+          </ul>
+        </ng-container>
+        </p>
+        <button (click)="seleccionarCurso(item)" type="button" class="btn-sunarp-black"><i class="fa fa-check icon-sunarp mr-2"></i>Ver Alumnos</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mt-2" [hidden]="cursoSeleccionado == null">
+  <h2 class="h2-sunarp text-sunarp-gray-dark text-center mt-4 mb-4">{{cursoSeleccionado?.curso}}</h2>
+  <button (click)="regresarListaCursos()" type="button" class="btn-sunarp-gray-light "><i class="fa fa-arrow-left icon-sunarp mr-2"></i>Regresar</button>
+  <h5 class="mt-2 w-100 text-center">Lista de Notas</h5>
+  <div class="table-responsive">
+    <table datatable class="table thead-sunarp" datatable [dtOptions]="datatable_lista_alumnos"
+      [dtTrigger]="datatable_dtTrigger_lista_alumnos">
+      <thead>
+        <tr>
+          <th style="width: 30px" class="text-center">Nro</th>
+          <th class="text-center">Codigo</th>
+          <th class="text-center">Paterno</th>
+          <th class="text-center">Materno</th>
+          <th class="text-center">Nombre</th>
+          <th class="text-center">Nota</th>
+          <th class="text-center">Estado</th>
+          <th class="text-center">Accion</th>
+        </tr>
+      </thead>
+      <tbody>
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<ng-template #modal_editar_notas let-c="close" let-d="dismiss">
+  <div class="modal-content">
+    <div class="modal-header bg-sunarp-gray-dark">
+      <h3 class="modal-title h3-sunarp text-white">{{lectura?'NOTAS CALIFICADAS':'REGISTRO Y EDICION DE NOTAS'}}</h3>
+      <button tabindex="-1" type="button" class="close" aria-label="Close"
+        style="overflow:hidden; position: absolute; right: 30px; top: 1px;background-color: transparent;border: 0px;"
+        (click)="modal_editar_notas_va.close();">
+        <span aria-hidden="true" style="font-size:35px !important;" class="text-white">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body pl-5 pb-4 pr-5 pt-4">
+      <h2 class="text-center mb-3" style="font-size: 20px;font-weight: bold;">ALUMNO : <span
+          class="text-sunarp-red">{{alumnoSeleccionado?.paterno +' '+alumnoSeleccionado?.materno+' '+alumnoSeleccionado.nombre}}</span>
+      </h2>
+      <div class="mt-2">
+        <div class="table-responsive">
+          <table class="table table-soli-devo row-focus w-100">
+            <thead>
+              <tr>
+                <th style="width: 30px" class="text-center">Nro</th>
+                <th class="text-center">Criterio</th>
+                <th class="text-center">Porcentaje</th>
+                <th *ngIf="!lectura" class="text-center">Nota</th>
+                <th *ngIf="!lectura"  class="text-center">Nota a favor estudiante</th>
+                <th *ngIf="lectura" class="text-center">Nota</th>
+                <th *ngIf="!lectura" class="text-center">Accion</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let nota of listaNotas; let i = index">
+                <td class="text-center">{{ nota.orden }}</td>
+                <td class="text-center">{{ nota.criterio }}</td>
+                <td class="text-center">{{ nota.porcentaje }} %</td>
+                <td *ngIf="lectura" class="text-center fw-bold">{{ nota.notaAlumno==null?'--': nota.notaAlumno }}</td>
+                <td class="text-center" *ngIf="!lectura" >
+                  <input
+                    digitOnly
+                    [(ngModel)]="listaNotas[i].nota"
+                    [decimal]="true"
+                    [decimalSeparator]="'.'"
+                    (blur)="formatearNota(i)"
+                    type="text"
+                    class="form-control-sunarp text-center"
+                    [class.input-invalid]="validarRango(listaNotas[i].nota) === 'invalid'"
+                    [class.input-valid]="validarRango(listaNotas[i].nota) === 'valid'"
+                    (input)="validarRango(listaNotas[i].nota)"
+                  />
+                </td>
+                <td class="text-center" *ngIf="!lectura" >
+                  <input
+                    digitOnly
+                    [(ngModel)]="listaNotas[i].notaAlumno"
+                    type="text"
+                    class="form-control-sunarp text-center"
+                    disabled="true"
+                  />
+                </td>
+                <td *ngIf="!lectura" >
+                  <div class="btn-group">
+                    <button [disabled]="nota.notaId == null || (listaNotas[i].nota == null || listaNotas[i].nota == '')" 
+                    (click)="eliminarNotaAlumno(nota)"
+                    type="button" class="btn-outline-sunarp-red"><i
+                      class="fa fa-trash"></i></button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="!lectura">
+                <td colspan="4" class="text-end">Promedio Calculado:</td>
+                <td *ngIf="false" class="text-center fw-bold">{{notaPoderada}}</td>
+                <td class="text-center fw-bold">{{notaPoderadaAlumnoReal}}</td>
+              </tr>
+              <tr *ngIf="!lectura">
+                <td colspan="4" class="text-end">Promedio a favor del Estudiante:</td>
+                <td class="text-center fw-bold">{{notaPoderadaAlumno}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div *ngIf="lectura" class="alert-promedio">
+          <span class="icono">
+            <img src="assets/img/sistema/nota.svg" alt="Icono" />
+          </span>
+          <span class="texto">
+            <strong>Promedio:</strong>&nbsp;{{alumnoSeleccionado.notaAlumnoFinal==null? '--':+alumnoSeleccionado.notaAlumnoFinal}}
+          </span>
+          <span class="estado">{{alumnoSeleccionado.estado=='A'?'Aprobado':alumnoSeleccionado.estado=='D'?'Desaprobado':'En curso'}}</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer d-flex justify-content-center">
+      <button *ngIf="!lectura" [disabled]="tieneNotasInvalidas()" (click)="guardarNotas()" type="button" class="btn-sunarp-black"><i
+        class="fa fa-save icon-sunarp mr-2"></i>Guardar</button>
+      <button (click)="modal_editar_notas_va.close();" type="button" class="btn-sunarp-red"><i
+          class="fa fa-times icon-sunarp mr-2"></i>Salir</button>
+    </div>
+  </div>
+</ng-template>

@@ -1,0 +1,91 @@
+<h2 class="h2-sunarp text-sunarp-gray-dark text-center mt-4 mb-4">Mis Cursos</h2>
+<div class="container-payment">
+  <div *ngFor="let item of listaCursos" class="card-payment">
+    <div class="face face1 bg-sunarp-red-light selected-face">
+      <div class="content-payment">
+        <img alt="icono"
+          [src]="authService.obtenerRol()== CONSTANTES.DOCENTE_ROL ? 'assets/img/docente.png' : 'assets/img/alumno-curso.png'" />
+        <h3>{{item.curso}}</h3>
+        <p class="mt-1 mb-0 text-white" *ngIf="item.seccion_codigo">Sección: {{item.seccion_codigo}}</p>
+      </div>
+    </div>
+    <div class="face face2 selected-face">
+      <div class="content-payment">
+        <p>Docente: <b>{{item.docente}}</b><br>Modalidad: <b>{{item.modalidad=='V'?'Virtual':item.modalidad=='P'?'Presencial':'Remota'}}</b>
+          <br *ngIf="item.horarios?.length">
+        <ng-container *ngIf="item.horarios?.length">
+          Horarios:
+            <ul class="horarios-list">
+              <li *ngFor="let h of item.horarios">{{h.dia}} {{h.horaInicio}} - {{h.horaFin}}</li>
+            </ul>
+          </ng-container>
+          <span class="badge-sunarp" [ngClass]="{'badge-sunarp-green': item.estado === 'A', 'badge-sunarp-red': item.estado === 'D', 'badge-sunarp-gray-light': item.estado !== 'A' && item.estado !== 'D'}"  style="font: 15px;">{{item.estado=='A'?'Aprobado':item.estado=='D'?'Desaprobado':'En curso'}}
+          </span>
+        </p>
+        <button (click)="seleccionAlumno(item)" type="button" class="btn-sunarp-black"><i
+            class="fa fa-check icon-sunarp mr-2"></i>Ver notas</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #modal_ver_notas let-c="close" let-d="dismiss">
+  <div class="modal-content">
+    <div class="modal-header bg-sunarp-gray-dark">
+      <h3 class="modal-title h3-sunarp text-white">NOTAS CALIFICADAS</h3>
+      <button tabindex="-1" type="button" class="close" aria-label="Close"
+        style="overflow:hidden; position: absolute; right: 30px; top: 1px;background-color: transparent;border: 0px;"
+        (click)="modal_ver_notas_va.close();">
+        <span aria-hidden="true" style="font-size:35px !important;" class="text-white">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body pl-5 pb-4 pr-5 pt-4">
+      <h2 class="text-center mb-3 text-sunarp-red" style="font-size: 20px;font-weight: bold;">
+        {{alumnoSeleccionado?.curso}}
+      </h2>
+      <h6 class="text-center">Creditos: {{alumnoSeleccionado?.creditos}}</h6>
+      <h6 class="text-center" *ngIf="alumnoSeleccionado?.seccion_codigo">Sección: {{alumnoSeleccionado?.seccion_codigo}}</h6>
+      <h6 class="text-center">Modalidad: {{alumnoSeleccionado?.modalidad=='V'?'Virtual':alumnoSeleccionado?.modalidad=='P'?'Presencial':'Remota'}}</h6>
+      <div class="text-center" *ngIf="alumnoSeleccionado?.horarios?.length">
+        <small><b>Horarios:</b></small>
+        <div *ngFor="let h of alumnoSeleccionado.horarios">{{h.dia}} {{h.horaInicio}} - {{h.horaFin}}</div>
+      </div>
+      <div class="mt-2">
+        <div class="table-responsive">
+          <table class="table table-soli-devo row-focus w-100">
+            <thead>
+              <tr>
+                <th style="width: 30px" class="text-center">N°</th>
+                <th class="text-center">Criterio</th>
+                <th class="text-center">Porcentaje</th>
+                <th class="text-center">Nota</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let nota of listaNotas; let i = index">
+                <td class="text-center">{{ nota.orden }}</td>
+                <td class="text-center">{{ nota.criterio }}</td>
+                <td class="text-center">{{ nota.porcentaje }} %</td>
+                <td class="text-center fw-bold">{{ nota.notaAlumno==null?'--': nota.notaAlumno }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="alert-promedio">
+          <span class="icono">
+            <img src="assets/img/sistema/nota.svg" alt="Icono" />
+          </span>
+          <span class="texto">
+            <strong>Promedio:</strong>&nbsp;{{alumnoSeleccionado.notaAlumnoFinal==null?
+            '--':+alumnoSeleccionado.notaAlumnoFinal}}
+          </span>
+          <span class="estado">{{alumnoSeleccionado.estado=='A'?'Aprobado':alumnoSeleccionado.estado=='D'?'Desaprobado':'En curso'}}</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer d-flex justify-content-center">
+      <button (click)="modal_ver_notas_va.close();" type="button" class="btn-sunarp-red"><i
+          class="fa fa-times icon-sunarp mr-2"></i>Salir</button>
+    </div>
+  </div>
+</ng-template>
