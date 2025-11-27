@@ -29,6 +29,35 @@
   </div>
 </div>
 
+<h2 class="h2-sunarp text-sunarp-gray-dark text-center mt-4 mb-4">Secciones Disponibles</h2>
+<div class="container-payment">
+  <div *ngFor="let item of listaDisponibles" class="card-payment">
+    <div class="face face1 bg-sunarp-red-light selected-face">
+      <div class="content-payment">
+        <img alt="icono"
+          src="assets/img/alumno-curso.png" />
+        <h3>{{item.curso}}</h3>
+        <p class="mt-1 mb-0 text-white" *ngIf="item.seccion_codigo">Sección: {{item.seccion_codigo}}</p>
+      </div>
+    </div>
+    <div class="face face2 selected-face">
+      <div class="content-payment">
+        <p>Docente: <b>{{item.docente}}</b><br>Modalidad: <b>{{item.modalidad=='V'?'Virtual':item.modalidad=='P'?'Presencial':'Remota'}}</b>
+          <br *ngIf="item.horarios?.length">
+          <ng-container *ngIf="item.horarios?.length">
+            Horarios:
+            <ul class="horarios-list">
+              <li *ngFor="let h of item.horarios">{{h.dia}} {{h.horaInicio}} - {{h.horaFin}}</li>
+            </ul>
+          </ng-container>
+        </p>
+        <button (click)="matricular(item)" type="button" class="btn-sunarp-black"><i
+            class="fa fa-check icon-sunarp mr-2"></i>Matricular</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <ng-template #modal_ver_notas let-c="close" let-d="dismiss">
   <div class="modal-content">
     <div class="modal-header bg-sunarp-gray-dark">

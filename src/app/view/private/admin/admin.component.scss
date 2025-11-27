@@ -1,0 +1,92 @@
+@import "src/assets/sass/general.scss";
+
+.admin-header {
+  background: linear-gradient(90deg, #d75443, #4b626c);
+  color: #fff;
+  padding: 14px 18px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+.titulo {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.tab-strip {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f7f7f7;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.tab-btn {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 10px 18px;
+  background: #fff;
+  color: #333;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-btn.active {
+  background: $sunarp-gray-dark;
+  color: #fff;
+  border-color: $sunarp-gray-dark;
+}
+
+.sunarp-card {
+  border-radius: 12px;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+  border: 0;
+}
+
+.sunarp-card .card-header {
+  background: $sunarp-gray-dark;
+  color: #fff;
+  font-weight: 700;
+  border-bottom: 0;
+}
+
+.sunarp-card .card-body {
+  padding: 18px;
+}
+
+.sunarp-card .form-group {
+  margin-bottom: 12px;
+}
+
+.horario-box {
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 8px;
+  background: #fafafa;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #f9f9f9;
+}
+
+.table thead th {
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(320px,1fr));
+  gap: 16px;
+}
+
+.mt-gap {
+  margin-top: 16px;
+}

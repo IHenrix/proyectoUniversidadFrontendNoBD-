@@ -1,0 +1,180 @@
+<div class="admin-header shadow-sm mb-3">
+  <div class="d-flex align-items-center gap-2">
+    <i class="fa fa-cogs text-sunarp-red" aria-hidden="true"></i>
+    <div>
+      <div class="titulo">Panel Administrador</div>
+      <small class="text-muted">Gestiona cursos, secciones y usuarios</small>
+    </div>
+  </div>
+</div>
+
+<div class="tab-strip mb-4">
+  <button class="tab-btn" [class.active]="selectedTab==='cursos'" (click)="cambiarTab('cursos')"><i class="fa fa-book mr-2"></i>Cursos</button>
+  <button class="tab-btn" [class.active]="selectedTab==='secciones'" (click)="cambiarTab('secciones')"><i class="fa fa-sitemap mr-2"></i>Secciones</button>
+  <button class="tab-btn" [class.active]="selectedTab==='usuarios'" (click)="cambiarTab('usuarios')"><i class="fa fa-users mr-2"></i>Usuarios</button>
+</div>
+
+<div class="tab-content mt-3" [ngSwitch]="selectedTab">
+  <!-- Cursos -->
+  <div *ngSwitchCase="'cursos'">
+    <div class="admin-grid mt-gap">
+      <div>
+        <div class="card sunarp-card">
+          <div class="card-header">Crear Curso</div>
+          <div class="card-body">
+            <form [formGroup]="cursoForm">
+              <div class="form-group"><label>Nombre</label><input class="form-control-sunarp" formControlName="nombre"></div>
+              <div class="form-group"><label>Horas semanales</label><input type="number" class="form-control-sunarp" formControlName="horas_semanales"></div>
+              <div class="form-group"><label>Créditos</label><input type="number" class="form-control-sunarp" formControlName="creditos"></div>
+              <div class="form-group"><label>Modalidad</label>
+                <select class="form-control-sunarp" formControlName="modalidad">
+                  <option *ngFor="let m of modalidades" [value]="m.code">{{m.label}}</option>
+                </select>
+              </div>
+              <button type="button" class="btn-sunarp-black btn-block mt-2" (click)="crearCurso()"><i class="fa fa-save icon-sunarp mr-2"></i>Guardar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card sunarp-card">
+          <div class="card-header">Cursos registrados</div>
+          <div class="card-body table-responsive">
+            <table class="table table-sm table-striped">
+              <thead>
+                <tr>
+                  <th>Nombre</th><th>Horas</th><th>Créditos</th><th>Modalidad</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let c of cursos">
+                  <td>{{c.nombre}}</td><td>{{c.horas_semanales}}</td><td>{{c.creditos}}</td>
+                  <td>{{c.modalidad=='V'?'Virtual':c.modalidad=='P'?'Presencial':'Remota'}}</td>
+                </tr>
+                <tr *ngIf="!cursos?.length"><td colspan="4" class="text-center text-muted">Sin registros</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Secciones -->
+  <div *ngSwitchCase="'secciones'">
+    <div class="admin-grid mt-gap">
+      <div>
+        <div class="card sunarp-card">
+          <div class="card-header">Crear Sección</div>
+          <div class="card-body">
+            <form [formGroup]="seccionForm">
+              <div class="form-group"><label>Código</label><input class="form-control-sunarp" formControlName="codigo"></div>
+              <div class="form-group"><label>Curso</label>
+                <select class="form-control-sunarp" formControlName="curso_id">
+                  <option [ngValue]="null">Seleccione</option>
+                  <option *ngFor="let c of cursos" [value]="c.id">{{c.nombre}}</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Docente</label>
+                <select class="form-control-sunarp" formControlName="docente_id">
+                  <option [ngValue]="null">Seleccione</option>
+                  <option *ngFor="let u of usuarios" [value]="u.id">{{u.nombre}} {{u.paterno}}</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-6"><label>Modalidad</label>
+                  <select class="form-control-sunarp" formControlName="modalidad">
+                    <option *ngFor="let m of modalidades" [value]="m.code">{{m.label}}</option>
+                  </select>
+                </div>
+                <div class="form-group col-6"><label>Nro vez</label><input type="number" class="form-control-sunarp" formControlName="numero_vez"></div>
+              </div>
+              <div class="form-group"><label>Estado</label><input class="form-control-sunarp" formControlName="estado"></div>
+              <div class="form-group" formArrayName="horarios">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <label class="mb-0">Horarios</label>
+                  <button class="btn btn-sm btn-outline-primary" type="button" (click)="addHorario()"><i class="fa fa-plus icon-sunarp mr-1"></i>Agregar</button>
+                </div>
+                <div *ngFor="let h of horariosArray.controls; let i = index" [formGroupName]="i" class="horario-box">
+                  <input class="form-control-sunarp mb-1" placeholder="Día" formControlName="dia">
+                  <div class="form-row">
+                    <div class="col"><input class="form-control-sunarp mb-1" placeholder="Hora inicio" formControlName="horaInicio"></div>
+                    <div class="col"><input class="form-control-sunarp mb-1" placeholder="Hora fin" formControlName="horaFin"></div>
+                  </div>
+                  <button class="btn btn-sm btn-outline-danger" type="button" (click)="removeHorario(i)">Quitar</button>
+                </div>
+              </div>
+              <button type="button" class="btn-sunarp-black btn-block mt-2" (click)="crearSeccion()"><i class="fa fa-save icon-sunarp mr-2"></i>Guardar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card sunarp-card">
+          <div class="card-header">Secciones registradas</div>
+          <div class="card-body table-responsive">
+            <table class="table table-sm table-striped">
+              <thead><tr><th>Código</th><th>Curso</th><th>Docente</th><th>Modalidad</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let s of secciones">
+                  <td>{{s.codigo}}</td>
+                  <td>{{ nombreCurso(s.curso_id) }}</td>
+                  <td>{{ nombreUsuario(s.docente_id) }}</td>
+                  <td>{{s.modalidad=='V'?'Virtual':s.modalidad=='P'?'Presencial':'Remota'}}</td>
+                </tr>
+                <tr *ngIf="!secciones?.length"><td colspan="4" class="text-center text-muted">Sin registros</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Usuarios -->
+  <div *ngSwitchCase="'usuarios'">
+    <div class="admin-grid mt-gap">
+      <div>
+        <div class="card sunarp-card">
+          <div class="card-header">Crear Usuario</div>
+          <div class="card-body">
+            <form [formGroup]="usuarioForm">
+              <div class="form-group"><label>Usuario</label><input class="form-control-sunarp" formControlName="username"></div>
+              <div class="form-group"><label>Contraseña</label><input type="password" class="form-control-sunarp" formControlName="passw"></div>
+              <div class="form-group"><label>Nombre</label><input class="form-control-sunarp" formControlName="nombre"></div>
+              <div class="form-group"><label>Paterno</label><input class="form-control-sunarp" formControlName="paterno"></div>
+              <div class="form-group"><label>Materno</label><input class="form-control-sunarp" formControlName="materno"></div>
+              <div class="form-group"><label>Rol</label>
+                <select class="form-control-sunarp" formControlName="rol_id">
+                  <option [value]="1">Alumno</option>
+                  <option [value]="2">Docente</option>
+                  <option [value]="3">Admin</option>
+                </select>
+              </div>
+              <button type="button" class="btn-sunarp-black btn-block mt-2" (click)="crearUsuario()"><i class="fa fa-save icon-sunarp mr-2"></i>Guardar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card sunarp-card">
+          <div class="card-header">Usuarios registrados</div>
+          <div class="card-body table-responsive">
+            <table class="table table-sm table-striped">
+              <thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Estado</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let u of usuarios">
+                  <td>{{u.username}}</td>
+                  <td>{{u.nombre}} {{u.paterno}}</td>
+                  <td>{{u.rol_id==1?'Alumno':u.rol_id==2?'Docente':'Admin'}}</td>
+                  <td><span [ngClass]="u.activo?'badge badge-success':'badge badge-secondary'">{{u.activo?'Activo':'Inactivo'}}</span></td>
+                </tr>
+                <tr *ngIf="!usuarios?.length"><td colspan="4" class="text-center text-muted">Sin registros</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

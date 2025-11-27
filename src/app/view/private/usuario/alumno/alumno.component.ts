@@ -17,6 +17,7 @@ export class AlumnoComponent implements OnInit {
   usuario: Usuario = null;
   CONSTANTES: typeof CONSTANTES = CONSTANTES;
   listaCursos:any=[];
+  listaDisponibles:any=[];
   alumnoSeleccionado:any=null;
   listaNotas:any=[];
   @ViewChild('modal_ver_notas') modal_ver_notas: NgbModalRef;
@@ -31,15 +32,22 @@ export class AlumnoComponent implements OnInit {
   ngOnInit() {
     this.spinner.show();
     this.usuario = this.authService.usuario;
+    this.cargarListas();
+  }
+
+  cargarListas(){
+    this.spinner.show();
     this.alumnoService.listarSecciones(this.usuario.id).subscribe({
       next: resp => {
         this.listaCursos=resp;
         this.spinner.hide();
       },
-      error: () => {
-        this.spinner.hide();
-      },
-    })
+      error: () => { this.spinner.hide(); },
+    });
+    this.alumnoService.listarSeccionesDisponibles(this.usuario.id).subscribe({
+      next: resp => { this.listaDisponibles = resp; },
+      error: () => {},
+    });
   }
 
   seleccionAlumno(alumno:any){
@@ -54,6 +62,17 @@ export class AlumnoComponent implements OnInit {
       error: () => {
         this.spinner.hide();
       },
+    })
+  }
+
+  matricular(seccion:any){
+    this.spinner.show();
+    this.alumnoService.matricular(this.usuario.id, seccion.seccion_id).subscribe({
+      next: () => {
+        this.cargarListas();
+        this.spinner.hide();
+      },
+      error: () => { this.spinner.hide(); }
     })
   }
 

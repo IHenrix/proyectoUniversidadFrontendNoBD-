@@ -48,7 +48,16 @@ export class LoginComponent {
       next: resp => {
         if (resp) {
           this._authService.saveUser(resp);
-          this.router.navigate([this._authService.obtenerRol() === CONSTANTES.ALUMNOS_ROL? "/usuario/alumno" : "/usuario/docente"])
+          const rol = this._authService.obtenerRol();
+          if (rol === CONSTANTES.ALUMNOS_ROL) {
+            this.router.navigate(["/usuario/alumno"]);
+          } else if (rol === CONSTANTES.DOCENTE_ROL) {
+            this.router.navigate(["/usuario/docente"]);
+          } else if (rol === CONSTANTES.ADMIN_ROL) {
+            this.router.navigate(["/admin"]);
+          } else {
+            this.router.navigate(["/login"]);
+          }
         }
         else{
           alertNotificacion("El usuario y contraseña no coincide")
